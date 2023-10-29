@@ -14,6 +14,9 @@ createrepo /var/www/html/yum/
 
 PyPi Local Mirror
 
+https://pypi.org/project/python-pypi-mirror/
+
+
 dnf install gcc python3-devel
 pip install python-pypi-mirror
 mkdir /var/www/html/pypi
