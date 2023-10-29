@@ -1,0 +1,25 @@
+Yum Local Mirror
+
+dnf install httpd
+dnf install createrepo
+-> Configure /etc/httpd/conf/httpd.conf
+Create new repo dir under:
+mkdir /var/www/html/yum/
+Download some local stuff
+dnf install --downloadonly --downloaddir=/var/www/html/yum libxmlb-devel
+createrepo /var/www/html/yum/
+
+-> Create localyum.repo etc etc
+
+
+PyPi Local Mirror
+
+dnf install gcc python3-devel
+pip install python-pypi-mirror
+mkdir /var/www/html/pypi
+mkdir /var/www/html/pypiidx
+pypi-mirror download -b -d /var/www/html/pypi boto3 pyyaml bindep requirements-parser dumb-init
+Ugh, had to hack dumb-init.1.2.5.postl.* to dumb-init.1.2.5.*
+pypi-mirror create -d /var/www/html/pypi -m /var/www/html/pypiidx
+
+Now http://ansible.local:83/pypiidx/ should work

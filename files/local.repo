@@ -1,0 +1,5 @@
+[localyum-repo]
+name=My Local Repository
+baseurl=http://ansible.local/yum
+enabled=1
+gpgcheck=0

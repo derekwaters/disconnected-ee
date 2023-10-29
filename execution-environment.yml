@@ -1,0 +1,37 @@
+# ansible-builder build -t disconnected-ee:latest
+
+version: 3
+
+images:
+  base_image:
+    name: registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel8:latest
+    # name: ansible.local:444/ee-minimal-rhel8
+
+dependencies:
+  galaxy:
+    collections:
+      - cloud.aws_troubleshooting
+
+additional_build_files:
+  - src: files/hub-ca.pem
+    dest: configs
+  - src: files/ansible.cfg
+    dest: configs
+  - src: files/pip.conf
+    dest: configs
+  - src: files/local.repo
+    dest: configs
+
+additional_build_steps:
+  prepend_base:
+    - RUN rm /etc/yum.repos.d/ubi.repo
+    - COPY _build/configs/local.repo /etc/yum.repos.d/local.repo
+    - COPY _build/configs/pip.conf /etc/pip.conf
+    - COPY _build/configs/hub-ca.pem /etc/pki/ca-trust/source/anchors/
+    - RUN update-ca-trust
+
+  prepend_galaxy:
+    - COPY _build/configs/ansible.cfg /etc/ansible/ansible.cfg
+
+options:
+  package_manager_path: /usr/bin/microdnf
