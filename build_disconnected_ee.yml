@@ -1,0 +1,65 @@
+---
+- name: Playbook to create test EE in a disconnected environment
+  hosts: localhost
+  gather_facts: false
+  collections:
+    - infra.ee_utilities
+  vars:
+    # For controller configuration definition
+    ee_builder_dir_clean: false
+    builder_dir: "."
+    ee_update_base_images: false
+    ee_reg_credential: Automation Hub Container Registry
+    ee_base_image: ansible.local:444/ee-minimal-rhel8:latest
+    ee_pull_collections_from_hub: true
+    ah_host: ansible.local:444
+    ah_token: ec28091dfebd9fb4c7ddc59d34cddb35350b71cb
+    ee_registry_dest: ansible.local:444
+    ee_registry_username: admin
+    ee_registry_password: secret123
+    ee_verbosity: 3
+    ee_list:
+      - name: disconnected-ee
+        alt_name: Disconnected Execution Environment
+        tag: v1
+        dependencies:
+          system:
+            - libxmlb-devel
+          python:
+            - boto3
+            - botocore
+          galaxy:
+            collections:
+              - cloud.aws_troubleshooting
+        
+        build_items:
+          - files/
+
+        build_files:
+          - src: files/hub-ca.pem
+            dest: configs
+          - src: files/ansible.cfg
+            dest: configs
+          - src: files/pip.conf
+            dest: configs
+          - src: files/local.repo
+            dest: configs
+
+        build_steps:
+          prepend_base:
+            - RUN rm /etc/yum.repos.d/ubi.repo
+            - COPY _build/configs/local.repo /etc/yum.repos.d/local.repo
+            - COPY _build/configs/pip.conf /etc/pip.conf
+            - COPY _build/configs/hub-ca.pem /etc/pki/ca-trust/source/anchors/
+            - RUN update-ca-trust
+
+          prepend_galaxy:
+            - COPY _build/configs/ansible.cfg /etc/ansible/ansible.cfg
+
+        images:
+          base_image:
+            name: ansible.local:444/ee-minimal-rhel8
+
+  roles:
+    - infra.ee_utilities.ee_builder
+...
